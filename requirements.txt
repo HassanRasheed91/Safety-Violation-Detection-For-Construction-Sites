@@ -1,0 +1,13 @@
+ultralytics>=8.0.0
+flask>=2.0.1
+pillow>=8.0.0
+numpy>=1.21.0
+python-dotenv>=0.19.0
+reportlab>=3.6.8
+arabic-reshaper
+gtts
+pygame
+pyttsx3
+python-bidi
+opencv-python
+torch 

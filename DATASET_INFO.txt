@@ -1,0 +1,86 @@
+
+# DATASET INFORMATION
+
+## Dataset Overview
+This project uses a custom dataset for construction site safety violation detection. The dataset is designed for training and evaluating object detection models (such as YOLO) to identify various safety violations and equipment in construction site images.
+
+### Typical Classes Included
+- Construction Machine
+- Fall Hazard
+- No Fall Protection
+- No Helmet
+- No Safety Glasses
+- No Safety Vest
+- Phone Usage
+- Poor Housekeeping
+- Safe Ladder Usage
+- Unsafe Ladder Use
+- Unsecure Electrical Wires
+- Using Mobile Beside Construction Machine (composite violation)
+
+## Dataset Structure
+The dataset should be organized in the following format (YOLO-style):
+
+```
+dataset/
+  images/
+    train/
+      img1.jpg
+      img2.jpg
+      ...
+    val/
+      img101.jpg
+      ...
+  labels/
+    train/
+      img1.txt
+      img2.txt
+      ...
+    val/
+      img101.txt
+      ...
+  data.yaml
+```
+
+- `images/train/` and `images/val/`: Folders containing training and validation images.
+- `labels/train/` and `labels/val/`: Corresponding YOLO-format label files for each image.
+- `data.yaml`: Configuration file listing class names and dataset paths.
+
+## How to Use or Add a Dataset
+1. **Prepare Images and Labels**
+   - Collect images of construction sites with visible safety equipment and violations.
+   - Annotate each image using a tool like [LabelImg](https://github.com/tzutalin/labelImg) or [Roboflow](https://roboflow.com/), saving labels in YOLO format.
+
+2. **Organize the Dataset**
+   - Place images and labels in the appropriate `train` and `val` folders as shown above.
+   - Ensure each image has a corresponding `.txt` label file with the same name.
+
+3. **Edit `data.yaml`**
+   - List all class names in the order expected by the model.
+   - Example:
+     ```yaml
+     train: dataset/images/train
+     val: dataset/images/val
+     nc: 12
+     names: ["construction-machine", "fall_hazard", "no-fall-protection", ...]
+     ```
+
+4. **Training**
+   - Update the model training script or notebook to point to your `data.yaml` and dataset path.
+   - Example command for YOLOv8:
+     ```
+     yolo task=detect mode=train data=dataset/data.yaml model=yolov8n.pt epochs=100 imgsz=640
+     ```
+
+5. **Using a New Dataset**
+   - Replace the existing dataset folder with your own, following the same structure.
+   - Update `data.yaml` as needed.
+   - Retrain the model using the new data.
+
+## Tips
+- Ensure class names in `data.yaml` match those expected by the code.
+- Use high-quality, diverse images for best results.
+- Regularly validate your dataset for annotation errors.
+
+---
+For more help, see the YOLO documentation or contact the project maintainer. 
