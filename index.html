@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Safety Violation Detector</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navy-blue: #001f3f;
+            --light-navy: #003366;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--white);
+            color: var(--navy-blue);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .header {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header p {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.1;
+        }
+
+        .animated-bg span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: var(--white);
+            animation: float 3s linear infinite;
+        }
+
+        .animated-bg span:nth-child(1) { left: 20%; animation-delay: 0s; }
+        .animated-bg span:nth-child(2) { left: 50%; animation-delay: 2s; }
+        .animated-bg span:nth-child(3) { left: 70%; animation-delay: 4s; }
+        .animated-bg span:nth-child(4) { left: 40%; animation-delay: 1s; }
+        .animated-bg span:nth-child(5) { left: 85%; animation-delay: 3s; }
+
+        /* Upload Section */
+        .upload-section {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .file-input-container {
+            border: 2px dashed var(--navy-blue);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-container:hover {
+            border-color: var(--light-navy);
+            background-color: rgba(0, 31, 63, 0.05);
+        }
+
+        .file-input-container input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--navy-blue);
+            margin-bottom: 1rem;
+        }
+
+        .analyze-btn {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            background-color: var(--light-navy);
+            transform: translateY(-2px);
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .violations-list {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 31, 63, 0.05);
+            border-radius: 5px;
+        }
+
+        .violation-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(0, 31, 63, 0.1);
+        }
+
+        .result-image-container {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .result-image {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .json-preview {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 1rem 0;
+            border: 1px solid #dee2e6;
+        }
+
+        .download-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .download-btn {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background-color: var(--light-navy);
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Add these new styles to your existing styles */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 31, 63, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--white);
+            border-top: 5px solid var(--navy-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--white);
+            margin-top: 1rem;
+            font-size: 1.2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .analyze-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analyze-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .analyze-btn.processing {
+            background-color: var(--light-navy);
+        }
+
+        .selected-image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 1rem auto;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .selected-image-preview.active {
+            display: block;
+        }
+
+        .clear-btn {
+            background-color: #dc3545;
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .clear-btn.active {
+            display: inline-block;
+        }
+
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Processing image...</div>
+    </div>
+
+    <div class="header">
+        <div class="animated-bg">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="container">
+            <h1>Safety Violation Detector</h1>
+            <p>Upload an image to detect safety violations in your workplace</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="upload-section">
+            <form id="uploadForm" action="/analyze" method="post" enctype="multipart/form-data">
+                <div class="file-input-container" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p>Click or drag an image here to upload</p>
+                    <input type="file" id="fileInput" name="image" accept="image/*" required>
+                </div>
+                <img id="selectedImagePreview" class="selected-image-preview" src="" alt="Selected image preview">
+                <button type="button" id="clearButton" class="clear-btn" onclick="clearImage()">
+                    <i class="fas fa-times"></i> Clear Image
+                </button>
+                <button type="submit" class="analyze-btn" id="analyzeBtn">
+                    <i class="fas fa-search"></i> Analyze Image
+                </button>
+            </form>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <h2>Analysis Results</h2>
+            
+            <h3>Detected Violations:</h3>
+            <div class="violations-list" id="violationsList">
+                <!-- Violations will be inserted here -->
+            </div>
+
+            <h3>JSON Response:</h3>
+            <div class="json-preview" id="jsonPreview">
+                <!-- JSON data will be inserted here -->
+            </div>
+
+            <h3>Analyzed Image:</h3>
+            <div class="result-image-container">
+                <img id="resultImage" class="result-image" src="" alt="Analyzed image">
+            </div>
+
+            <div class="download-options">
+                <button class="download-btn" onclick="downloadImage()">
+                    <i class="fas fa-image"></i> Download Image
+                </button>
+                <button class="download-btn" onclick="downloadJSON()">
+                    <i class="fas fa-file-code"></i> Download JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentResult = null;
+        let selectedFile = null;
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = true;
+            analyzeBtn.classList.add('processing');
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = false;
+            analyzeBtn.classList.remove('processing');
+            analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Image';
+        }
+
+        function clearImage() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('selectedImagePreview').classList.remove('active');
+            document.getElementById('clearButton').classList.remove('active');
+            document.querySelector('.file-input-container p').textContent = 'Click or drag an image here to upload';
+            selectedFile = null;
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedFile) {
+                alert('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert(result.error);
+                    return;
+                }
+
+                // Store the result for downloading later
+                currentResult = result;
+
+                // Display violations
+                const violationsList = document.getElementById('violationsList');
+                violationsList.innerHTML = result.violations.map(v => `
+                    <div class="violation-item">
+                        <span>${v.class}</span>
+                        <span>Confidence: ${(v.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                `).join('');
+
+                // Display JSON preview
+                const jsonPreview = document.getElementById('jsonPreview');
+                jsonPreview.textContent = JSON.stringify(result, null, 2);
+
+                // Display image
+                document.getElementById('resultImage').src = result.annotated_image;
+                
+                // Show results section
+                document.getElementById('resultsSection').classList.add('active');
+            } catch (error) {
+                alert('An error occurred while analyzing the image.');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // File input preview
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.querySelector('.file-input-container p').textContent = `Selected: ${file.name}`;
+                
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('selectedImagePreview');
+                    preview.src = e.target.result;
+                    preview.classList.add('active');
+                    document.getElementById('clearButton').classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Download functions
+        function downloadImage() {
+            const img = document.getElementById('resultImage');
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = 'safety-analysis.jpg';
+            a.click();
+        }
+
+        function downloadJSON() {
+            if (!currentResult) return;
+            
+            const dataStr = JSON.stringify(currentResult, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'safety-analysis.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html> 
